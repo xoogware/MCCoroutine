@@ -91,49 +91,20 @@ subprojects {
 
     publishing {
         publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
-                pom {
-                    name = 'MCCoroutine'
-                    description = 'MCCoroutine is a library, which adds extensive support for Kotlin Coroutines for Minecraft Server environments.'
-                    url = 'https://github.com/Shynixn/MCCoroutine'
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = 'http://www.opensource.org/licenses/mit-license.php'
-                        }
-                    }
-                    developers {
-                        developer {
-                            name = 'Shynixn'
-                            url = 'https://github.com/Shynixn'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:git://github.com/Shynixn/MCCoroutine.git'
-                        developerConnection = 'scm:git:ssh://github.com:Shynixn/MCCoroutine.git'
-                        url = 'http://github.com/Shynixn/MCCoroutine.git/tree/master'
-                    }
-                }
+            gpr(MavenPublication) {
+                from(components.java)
             }
         }
         repositories {
             maven {
-                name = "GithubPackages"
                 url = "https://maven.pkg.github.com/xoogware/mccoroutine"
 
                 credentials {
-                    username = project.hasProperty("gpr.user") ? project.findProperty("gpr.user") : System.getenv("USERNAME")
-                    password = project.hasProperty("gpr.key") ? project.findProperty("gpr.key") : System.getenv("TOKEN")
+                    username = project.hasProperty("gpr.user") ? project.findProperty("gpr.user") : System.getenv("GITHUB_ACTOR")
+                    password = project.hasProperty("gpr.key") ? project.findProperty("gpr.key") : System.getenv("GITHUB_TOKEN")
                 }
             }
         }
-    }
-
-    signing {
-        sign publishing.publications.mavenJava
     }
 
     repositories {

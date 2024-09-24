@@ -32,8 +32,9 @@ jobs:
           ./gradlew clean build
 
       - name: Publish Release to Github Package Registry
-        run: |
-          ./gradlew publish
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Documentation:
     runs-on: ubuntu-latest
