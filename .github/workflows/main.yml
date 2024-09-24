@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, development ]
+    branches: [ actions-publish ]
   pull_request:
-    branches: [ master, development ]
+    branches: [ actions-publish ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,166 +31,9 @@ jobs:
           chmod +x gradlew
           ./gradlew clean build
 
-      - name: Publish Release to Maven Central
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        env:
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: ${{ secrets.SIGNING_KEY_FILE }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Publish Release to Github Package Registry
         run: |
-          echo ${{ secrets.SECRET_KEY_FILE_CONTENTS }} > travis_secret_key_txt.gpg
-          base64 --decode travis_secret_key_txt.gpg > travis_secret_key.gpg
-          gpg2 --batch --cipher-algo AES256 --passphrase ${{ secrets.SIGNING_KEY_PASSWORD }} travis_secret_key.gpg
-          echo "RELEASE_VERSION=$(./gradlew -q printVersion)" >> $GITHUB_ENV
-          ./gradlew clean publishToNexus
-          ./gradlew closeAndReleaseRepository
-
-      - name: Create Github Release
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          body: "This release was automatically created by Github Actions. Please wait until the author manually sets the patchnotes for this release."
-          tag_name: ${{ env.RELEASE_VERSION }}
-          release_name: Release ${{ env.RELEASE_VERSION }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Bukkit Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-bukkit-api/build/libs/mccoroutine-bukkit-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Bukkit-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload Bukkit Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-bukkit-core/build/libs/mccoroutine-bukkit-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Bukkit-Core.jar
-          asset_content_type: application/jar
-
-      - name: Upload Sponge Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-sponge-api/build/libs/mccoroutine-sponge-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Sponge-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload Sponge Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-sponge-core/build/libs/mccoroutine-sponge-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Sponge-Core.jar
-          asset_content_type: application/jar
-
-      - name: Upload BungeeCord Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-bungeecord-api/build/libs/mccoroutine-bungeecord-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-BungeeCord-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload BungeeCord Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-bungeecord-core/build/libs/mccoroutine-bungeecord-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-BungeeCord-Core.jar
-          asset_content_type: application/jar
-
-      - name: Upload Velocity Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-velocity-api/build/libs/mccoroutine-velocity-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Velocity-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload Velocity Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-velocity-core/build/libs/mccoroutine-velocity-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Velocity-Core.jar
-          asset_content_type: application/jar
-
-      - name: Upload Minestom Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-minestom-api/build/libs/mccoroutine-minestom-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Minestom-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload Minestom Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-minestom-core/build/libs/mccoroutine-minestom-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Minestom-Core.jar
-          asset_content_type: application/jar
-
-      - name: Upload Fabric Api to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-fabric-api/build/libs/mccoroutine-fabric-api-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Fabric-Api.jar
-          asset_content_type: application/jar
-
-      - name: Upload Fabric Core to Github
-        if: "contains(github.event.head_commit.message, '--release') && contains(github.ref, 'master')"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /home/runner/work/MCCoroutine/MCCoroutine/mccoroutine-fabric-core/build/libs/mccoroutine-fabric-core-${{ env.RELEASE_VERSION }}.jar
-          asset_name: MCCoroutine-Fabric-Core.jar
-          asset_content_type: application/jar
+          ./gradlew publish
 
   Documentation:
     runs-on: ubuntu-latest

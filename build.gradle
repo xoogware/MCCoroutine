@@ -121,13 +121,12 @@ subprojects {
         }
         repositories {
             maven {
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                name = "Github Packages"
+                url = "https://maven.pkg.github.com/xoogware/mccoroutine"
 
                 credentials {
-                    username = project.hasProperty("ossrhUsername") ? project.findProperty("ossrhUsername") : System.getenv('SONATYPE_USERNAME')
-                    password = project.hasProperty("ossrhPassword") ? project.findProperty("ossrhPassword") : System.getenv('SONATYPE_PASSWORD')
+                    username = project.hasProperty("gpr.user") ? project.findProperty("gpr.user") : System.getenv("USERNAME")
+                    password = project.hasProperty("gpr.key") ? project.findProperty("gpr.key") : System.getenv("TOKEN")
                 }
             }
         }
