@@ -106,10 +106,7 @@ class MockedVelocityServer {
             return Optional.of(this)
         }
 
-        // not used in our tests :3 (for now)
-        override fun getExecutorService(): ExecutorService {
-            TODO("Not yet implemented")
-        }
+        override fun getExecutorService(): ExecutorService = Executors.newSingleThreadExecutor()
     }
 
     /**
