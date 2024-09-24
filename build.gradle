@@ -121,7 +121,7 @@ subprojects {
         }
         repositories {
             maven {
-                name = "Github Packages"
+                name = "GithubPackages"
                 url = "https://maven.pkg.github.com/xoogware/mccoroutine"
 
                 credentials {
