@@ -65,12 +65,15 @@ class EventServiceImpl(
 
         val handlerRegistrationClass =
             Class.forName("com.velocitypowered.proxy.event.VelocityEventManager\$HandlerRegistration")
+        val asyncTypeClass =
+            Class.forName("com.velocitypowered.proxy.event.VelocityEventManager\$AsyncType")
         val handlerRegistrationClassConstructor = handlerRegistrationClass.getDeclaredConstructor(
             PluginContainer::class.java,
             Short::class.java,
             Class::class.java,
             Any::class.java,
-            EventHandler::class.java
+            EventHandler::class.java,
+            asyncTypeClass
         )
         handlerRegistrationClassConstructor.isAccessible = true
 
@@ -107,7 +110,8 @@ class EventServiceImpl(
                     order,
                     eventType,
                     listener,
-                    handler
+                    handler,
+                    asyncTypeClass.enumConstants[2]
                 )
                 registrations.add(handlerRegistration)
                 continue
@@ -126,7 +130,14 @@ class EventServiceImpl(
             val untargetedHandler = loadingCacheClassGetMethod.invoke(unTargetedMethodHandlers, method)
             val handler = buildHandlerMethod.invoke(untargetedHandler, listener) as EventHandler<Any>
             val handlerRegistration =
-                handlerRegistrationClassConstructor.newInstance(pluginContainer, order, eventType, listener, handler)
+                handlerRegistrationClassConstructor.newInstance(
+                    pluginContainer,
+                    order,
+                    eventType,
+                    listener,
+                    handler,
+                    asyncTypeClass.enumConstants[2]
+                )
 
             if (!onlyRegisterSuspend) {
                 registrations.add(handlerRegistration)
