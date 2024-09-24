@@ -68,7 +68,6 @@ class MockedVelocityServer {
         }
         Mockito.`when`(server.scheduler).thenReturn(scheduler)
         Mockito.`when`(server.pluginManager).thenReturn(pluginManager)
-        Mockito.`when`(pluginManager.isLoaded(Mockito.anyString())).thenReturn(true)
 
         val commandManager = VelocityCommandManager(eventManager, pluginManager)
         Mockito.`when`(server.commandManager).thenReturn(commandManager)
@@ -78,6 +77,9 @@ class MockedVelocityServer {
 
         val suspendingPluginContainer = SuspendingPluginContainer(plugin, server, logger)
         suspendingPluginContainer.initialize(plugin.instance.get())
+
+        Mockito.`when`(pluginManager.isLoaded(Mockito.anyString())).thenReturn(true)
+        Mockito.`when`(pluginManager.ensurePluginContainer(Mockito.any())).thenReturn(plugin)
 
         return plugin
     }
