@@ -8,6 +8,7 @@ import com.velocitypowered.api.event.EventHandler
 import com.velocitypowered.api.event.EventTask
 import com.velocitypowered.api.plugin.PluginContainer
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.lang.reflect.Method
 import kotlin.coroutines.Continuation
 
@@ -26,6 +27,7 @@ class EventServiceImpl(
         registerInternally(listener, onlyRegisterSuspend)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun registerInternally(listener: Any, onlyRegisterSuspend: Boolean) {
         val eventManager = suspendingPluginContainer.server.eventManager
 
@@ -120,15 +122,15 @@ class EventServiceImpl(
             if (errors != null) {
                 suspendingPluginContainer.logger.info(
                     "Invalid listener method {} in {}: {}",
-                    method.getName(),
-                    method.getDeclaringClass().getName(),
+                    method.name,
+                    method.declaringClass.getName(),
                     errors
                 )
                 continue
             }
 
             val untargetedHandler = loadingCacheClassGetMethod.invoke(unTargetedMethodHandlers, method)
-            val handler = buildHandlerMethod.invoke(untargetedHandler, listener) as EventHandler<Any>
+            val handler = buildHandlerMethod.invoke(untargetedHandler, listener) as EventHandler<*>
             val handlerRegistration =
                 handlerRegistrationClassConstructor.newInstance(
                     pluginContainer,
